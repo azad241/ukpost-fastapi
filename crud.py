@@ -7,13 +7,13 @@ import models, schemas
 
 
 #get 4 digit post codes
-def get_postcode(db: Session, skip: int = 0, limit: int = 20, query: str =''):
+def get_fourpostcode(db: Session, skip: int = 0, limit: int = 20, query: str =''):
     if query!='':
         return db.query(models.Fourdigit).filter(models.Fourdigit.code.contains(query.lower())).offset(0).limit(80).all()
     return db.query(models.Fourdigit).offset(skip).limit(limit).all()
 
 #get 3 digit post codes
-def get_postcode_by_fourdigit(db: Session, fourdigit: str = '', skip: int = 0, limit: int = 20, query: str = ''):
+def get_threepostcode(db: Session, fourdigit: str = '', skip: int = 0, limit: int = 20, query: str = ''):
     if query!='':
         return db.query(models.Threeigit).filter(models.Threeigit.code.contains(query.lower())).offset(0).limit(80).all()
     fourdigit_record = db.query(models.Fourdigit).filter(models.Fourdigit.code == fourdigit).first()
@@ -43,47 +43,54 @@ def get_postcode_details(db: Session, fourdigit: str='', threedigit: str=''):
         .joinedload(models.County.country)).filter(and_(
         models.Postcode.fourdigit_id==fourdigit_record.id,
         models.Postcode.threedigit_id==threedigit_record.id)).first()
+#county by country
+def get_county(db: Session, country: str):
+    return db.query(models.Country).options(
+        joinedload(models.Country.counties)
+    ).filter(models.Country.slug == country).first()
+#district by country/county
+def get_district(db: Session, country: str, county: str):
+    country_record = db.query(models.Country).filter(models.Country.slug == country).first()
+    if not country_record:
+        return []
+    return db.query(models.County).options(
+        joinedload(models.County.districts)
+    ).filter(and_(models.County.slug == county, models.County.country_id == country_record.id)).first()
+#ward by country/county/district 
+def get_ward(db: Session, country: str, county: str, district: str):
+    country_record = db.query(models.Country).filter(models.Country.slug == country).first()
+    if not country_record:
+        return []
+    county_record = db.query(models.County).filter(and_(models.County.slug == county,
+      models.County.country_id == country_record.id)).first()
+    if not county_record:
+        return []
+
+    return db.query(models.District).options(
+        joinedload(models.District.wards)
+    ).filter(and_(models.District.county_id == county_record.id,
+    models.District.slug == district)).first()
+
+#postcodes by country/county/district/ward
+def get_postcodes(db: Session, country: str, county: str, district: str, ward: str):
+    country_record = db.query(models.Country).filter(models.Country.slug == country).first()
+    if not country_record:
+        return []
+    county_record = db.query(models.County).filter(and_(models.County.slug == county,
+      models.County.country_id == country_record.id)).first()
+    if not county_record:
+        return []
+    distinct_record = db.query(models.District).filter(and_(models.District.slug == district,
+      models.District.county_id == county_record.id)).first()
+    if not distinct_record:
+        return []
+    
+    return db.query(models.Ward).options(
+        joinedload(models.Ward.postcodes)
+        .joinedload(models.Postcode.fourdigit),
+        joinedload(models.Ward.postcodes)
+        .joinedload(models.Postcode.threedigit)
+    ).filter(and_(models.Ward.slug == ward,
+    models.Ward.district_id == distinct_record.id)).first()
 
 
-
-
-
-# def get_county(db: Session, county_slug: str,country_slug: str, ):
-#     return db.query(models.County).options(
-#         joinedload(models.County.districts)
-#     ).filter(models.County.slug == county_slug, models.Country.slug==country_slug).first()
-
-# def get_postcode(db: Session, post_code_id: int):
-#     return db.query(models.Postcode).options(
-#         joinedload(models.Postcode.ward)
-#         .joinedload(models.Ward.district)
-#         .joinedload(models.District.county)
-#         .joinedload(models.County.country)
-#     ).filter(models.Postcode.id == post_code_id).first()
-
-# def get_postcode_by_code(db: Session, fourdigits: str, threedigits: str):
-#     fourdigit_record = db.query(models.Fourdigit).filter(models.Fourdigit.code == fourdigits).first()
-#     if not fourdigit_record:
-#         return None
-#     threedigit_record = db.query(models.Threeigit).filter(models.Threeigit.code == threedigits).first()
-#     if not threedigit_record:
-#         return None
-
-#     return db.query(models.Postcode).options(
-#         joinedload(models.Postcode.ward)
-#         .joinedload(models.Ward.district)
-#         .joinedload(models.District.county)
-#         .joinedload(models.County.country)
-#     ).filter(
-#         and_(
-#             models.Postcode.fourdigit_id == fourdigit_record.id,
-#             models.Postcode.threedigit_id == threedigit_record.id
-#         )
-#     ).first()
-
-# def get_ward(db: Session, ward_slug: int):
-#     return db.query(models.ward).options(
-#         joinedload(models.Ward.district)
-#         .joinedload(models.District.county)
-#         .joinedload(models.County.country)
-#     ).filter(models.Ward.slug == ward_slug).first()

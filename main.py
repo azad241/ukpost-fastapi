@@ -39,41 +39,36 @@ def get_db():
 def root():
     return {'status':'Working...'}
 
-#get 4 digit postcode
+#get 4digitpostcode
 @app.get("/postcode/", response_model=None)
-def read_postcode(skip: int = 0, limit: int = 20, query: str = '', db: Session = Depends(get_db)):
-    return crud.get_postcode(db=db, skip=skip, limit=limit, query=query)
+def read_fourpostcode(skip: int = 0, limit: int = 20, query: str = '', db: Session = Depends(get_db)):
+    return crud.get_fourpostcode(db=db, skip=skip, limit=limit, query=query)
 
-#get 3 digit postcode
+#get 3digitpostcode by 4digitpostcode
 @app.get("/postcode/{slug}/", response_model=None)
-def read_postcode_by_fourdigit(slug: str='', skip: int = 0, limit: int = 20, query: str = '', db: Session = Depends(get_db)):
-    return crud.get_postcode_by_fourdigit(db=db, fourdigit=slug, skip=skip, limit=limit, query=query)
+def read_threepostcode(slug: str='', skip: int = 0, limit: int = 20, query: str = '', db: Session = Depends(get_db)):
+    return crud.get_threepostcode(db=db, fourdigit=slug, skip=skip, limit=limit, query=query)
 
-#get 7 digit postcode details
+#get 7 digit postcode details by 4digitpostcode/3digitpostcode
 @app.get("/postcode/{fourdigit}/{threedigit}/", response_model=None)
 def read_postcode_details(fourdigit: str='', threedigit: str='', db: Session = Depends(get_db)):
     return crud.get_postcode_details(db=db, fourdigit=fourdigit, threedigit=threedigit)
 
-# @app.get("/country/{slug}/", response_model=None)
-# def read_country(slug: str, db: Session = Depends(get_db)):
-#     return crud.get_country(db=db, slug = slug)
+#county by country
+@app.get("/{country}/", response_model=None)
+def read_county(country: str, db: Session = Depends(get_db)):
+    return crud.get_county(db=db, country = country)
+#district by country/county
+@app.get("/{country}/{county}/", response_model=None)
+def read_district(country: str, county: str, db: Session = Depends(get_db)):
+    return crud.get_district(db=db, country = country, county = county)
+#ward by country/county/district 
+@app.get("/{country}/{county}/{district}/", response_model=None)
+def read_ward(country: str, county: str, district: str, db: Session = Depends(get_db)):
+    return crud.get_ward(db=db, country = country, county = county, district = district)
+#postcodes by country/county/district/ward
+@app.get("/{country}/{county}/{district}/{ward}/", response_model=None)
+def read_postcodes(country: str, county: str, district: str, ward: str, db: Session = Depends(get_db)):
+    return crud.get_postcodes(db=db, country = country, county = county, district = district, ward = ward)
 
-# @app.get("/{country_slug}/{county_slug}/", response_model=None)
-# def read_county(country_slug: str, county_slug:str, db: Session = Depends(get_db)):
-#     return crud.get_county(db=db, country_slug = country_slug, county_slug=county_slug )
 
-
-# @app.get("/postcode/{id}/", response_model=None)
-# def read_postcode_by_id(id: int, db: Session = Depends(get_db)):
-#     return crud.get_postcode(db=db, post_code_id = id)
-
-# @app.post("/postcodes/", response_model=schemas.Postcode)
-# def create_postcode(postcode: schemas.PostcodeCreate, db: Session = Depends(get_db)):
-#     return crud.create_postcode(db=db, postcode=postcode)
-#
-# @app.get("/cities/{city_id}", response_model=schemas.City)
-# def read_city(city_id: int, db: Session = Depends(get_db)):
-#     db_city = crud.get_city(db=db, city_id=city_id)
-#     if db_city is None:
-#         raise HTTPException(status_code=404, detail="City not found")
-#     return db_city
