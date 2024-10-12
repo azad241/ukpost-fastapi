@@ -1,0 +1,3 @@
+need to change worker_class to on VPS:
+
+worker_class = 'uvicorn.workers.UvicornWorker'
