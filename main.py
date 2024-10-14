@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 import models, schemas, crud
 from database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
-
+from starlette.responses import JSONResponse
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -11,11 +11,9 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "http://localhost:3000",
+    "https://mydomain.com",
     "http://192.168.0.103:3000",
-    "*"
+    "192.168.0.103:3000"
 ]
 
 app.add_middleware(
@@ -25,6 +23,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def block_direct_ip_access(request: Request, call_next):
+    host = request.headers.get("host")
+    # Block access if the request is not through api.mydomain.com
+    if host and "api.mydomain.com" not in host:
+        return JSONResponse(status_code=403, content={"detail": "Access denied."})
+    response = await call_next(request)
+    return response
 
 
 

@@ -3,9 +3,6 @@ from sqlalchemy import and_, select
 import models, schemas
 
 
-
-
-
 #get 4 digit post codes
 def get_fourpostcode(db: Session, skip: int = 0, limit: int = 20, query: str =''):
     if query!='':
