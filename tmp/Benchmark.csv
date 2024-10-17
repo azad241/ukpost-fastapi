@@ -1,0 +1,23 @@
+,,fastapi dev main.py --host 0.0.0.0,,
+,,,,
+,,✔,X,
+statement,time takes unknows,old,new,more
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/,12913@152ms,27527@180ms,28707@172ms,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/postcode/,2737@686ms,6504@751ms,6779@717ms,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/postcode/ab10/,190@1.33s,468@1.37s,401@1.26s,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/postcode/ab10/1af/,708@760js,3868@905ms,378@1.31s,new2: 459@1.25s new3: 440@1.24s old2: 5749@1.26s old3: 5304@917ms
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/england/,1137@1.53s,2873@1.62s,2227@1.64s,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/england/bedfordshire/,2343@767ms,6726@725ms,6578@742ms,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/england/bedfordshire/central-bedfordshire/,1364@1.34ms,2616@1.77s,3418@1.40s,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/england/bedfordshire/central-bedfordshire/arlesey-fairfield/,,34@0.00,312@1.42s,new2: 369@1.44
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/area/ab/,3227@601,6934@702ms,6767@722ms,
+,,,,
+wrk -t 6 -c 200 -d  25 http://192.168.0.103:8000/search/?query=a,2495@764ms,6911@706ms,5375@704ms,

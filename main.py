@@ -46,6 +46,12 @@ def get_db():
 def root():
     return {'status':'Working...'}
 
+
+#Searching
+@app.get("/search/", response_model=None)
+def read_search_results(query: str = '', querytype: str = 'postcode', skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    return crud.get_search_results(db=db, query = query.lower(), querytype = querytype.lower(), skip=skip, limit=limit)
+
 #get 4digitpostcode
 @app.get("/postcode/", response_model=None)
 def read_fourpostcode(skip: int = 0, limit: int = 20, query: str = '', db: Session = Depends(get_db)):
@@ -61,6 +67,11 @@ def read_threepostcode(slug: str='', skip: int = 0, limit: int = 20, query: str 
 def read_postcode_details(fourdigit: str='', threedigit: str='', db: Session = Depends(get_db)):
     return crud.get_postcode_details(db=db, fourdigit=fourdigit, threedigit=threedigit)
 
+#postcodes by area code(one or two letter)
+@app.get("/area/{code}/", response_model=None)
+def read_postcode_by_areacode(code: str, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    return crud.get_postcode_by_areacode(db=db, slug = code.lower(), skip=skip, limit=limit)
+
 #county by country
 @app.get("/{country}/", response_model=None)
 def read_county(country: str, db: Session = Depends(get_db)):
@@ -75,7 +86,9 @@ def read_ward(country: str, county: str, district: str, db: Session = Depends(ge
     return crud.get_ward(db=db, country = country, county = county, district = district)
 #postcodes by country/county/district/ward
 @app.get("/{country}/{county}/{district}/{ward}/", response_model=None)
-def read_postcodes(country: str, county: str, district: str, ward: str, db: Session = Depends(get_db)):
+def read_postcodes(country: str, county: str, district: str, ward: str,  db: Session = Depends(get_db)):
     return crud.get_postcodes(db=db, country = country, county = county, district = district, ward = ward)
+
+
 
 

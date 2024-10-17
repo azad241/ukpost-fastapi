@@ -68,7 +68,7 @@ class Fourdigit(Base):
     # One-to-many relationship with Postcode
     fourdigits = relationship("Postcode", back_populates="fourdigit")
 
-class Threeigit(Base):
+class Threedigit(Base):
     __tablename__ = "threedigits"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -95,5 +95,5 @@ class Postcode(Base):
     ward = relationship("Ward", back_populates="postcodes")
 
     fourdigit =  relationship("Fourdigit", back_populates="fourdigits")
-    threedigit =  relationship("Threeigit", back_populates="threedigits")
+    threedigit =  relationship("Threedigit", back_populates="threedigits")
 
