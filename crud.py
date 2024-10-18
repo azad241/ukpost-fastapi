@@ -122,16 +122,19 @@ def get_postcodes(db: Session, country: str, county: str, district: str, ward: s
 
 # Get search results
 def get_search_results(db: Session, skip: int, limit: int, query: str, querytype: str):
-    query_parts = query.lower().replace(' ', ' ').split(' ')
+    # Split query into parts
+    query_parts = query.lower().replace('-', ' ').split(' ')
     query1 = query_parts[0] if len(query_parts) > 0 else ''
     query2 = query_parts[1] if len(query_parts) > 1 else ''
+    
     if querytype == 'postcode':
         fourdigit_results = db.query(models.Fourdigit).filter(models.Fourdigit.code.ilike(f"{query1}%")).all()
+        if not fourdigit_results:
+            return []
         threedigit_results = db.query(models.Threedigit).filter(models.Threedigit.code.ilike(f"{query2}%")).all()
         postcodes = db.query(models.Postcode).join(models.Fourdigit).join(models.Threedigit)
-        if fourdigit_results:
-            postcodes = postcodes.filter(models.Postcode.fourdigit_id.in_([f.id for f in fourdigit_results]))
-        if threedigit_results:
+        postcodes = postcodes.filter(models.Postcode.fourdigit_id.in_([f.id for f in fourdigit_results]))
+        if query2 and threedigit_results:
             postcodes = postcodes.filter(models.Postcode.threedigit_id.in_([t.id for t in threedigit_results]))
         results = postcodes.offset(skip).limit(limit).all()
         return [
@@ -140,5 +143,12 @@ def get_search_results(db: Session, skip: int, limit: int, query: str, querytype
                 "threedigit": result.threedigit.code
             } for result in results
         ]
+    elif querytype == 'ward':
+        return []
+    elif querytype == 'district':
+        return []
+    elif querytype == 'county':
+        return []
     else:
         return {"error": "Invalid query type"}
+
